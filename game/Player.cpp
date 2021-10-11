@@ -8578,6 +8578,7 @@ void idPlayer::PerformImpulse( int impulse ) {
 			idPlayer* player;
 			idDict		dict;
 			idStr waveCounter;
+			idAI test;
 			player = gameLocal.GetLocalPlayer();
 			//yaw = player->viewAngles.yaw;
 			ent = gameLocal.spawnedEntities.Next();
@@ -8608,12 +8609,18 @@ void idPlayer::PerformImpulse( int impulse ) {
 				x = 8349;
 				y = -8412;
 				z = 129;
-				dict.Set("origin", idVec3(x+(i+1)*50,y, z).ToString());
+				dict.Set("origin", idVec3(x,y+(i+1)*50, z).ToString());
 				idEntity* newEnt = NULL;
 				gameLocal.SpawnEntityDef(dict, &newEnt);
 
 				if (newEnt) {
 					gameLocal.Printf("spawned entity '%s'\n", newEnt->name.c_str());
+				}
+			}
+			for (ent = gameLocal.spawnedEntities.Next(); ent != NULL; ent = ent->spawnNode.Next()) {
+				if (ent->IsType(idAI::GetClassType())) {
+					//idAI* ptr = static_cast<idAI*>(ent);
+					//idAI::CustomMove
 				}
 			}
 			break;
