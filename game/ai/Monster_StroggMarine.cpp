@@ -390,6 +390,11 @@ rvMonsterStroggMarine::CheckActions
 ================
 */
 bool rvMonsterStroggMarine::CheckActions ( void ) {
+	int x = 8349;
+	int y = -8412;
+	int z = 129;
+	idVec3 pos = idVec3(x+50, y, z);
+	StartMove(MOVE_TO_POSITION, pos, 1, NULL, NULL, 10);
 
 	if ( idAI::CheckActions ( ) ) 
 	{

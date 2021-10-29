@@ -1199,7 +1199,7 @@ bool idAI::MoveTo ( const idVec3 &pos, float range ) {
 	if ( !PathToGoal( path, areaNum, physicsObj.GetOrigin(), PointReachableAreaNum( physicsObj.GetOrigin() ), org ) ) {
 		return false;
 	}
-	
+	common->Printf("%d", areaNum);
 	// Start moving
 	return StartMove ( MOVE_TO_POSITION, org, areaNum, NULL, NULL, range );
 }

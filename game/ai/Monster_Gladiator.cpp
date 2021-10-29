@@ -144,6 +144,12 @@ stays hidden behind his shield if getting shot at.
 */
 bool rvMonsterGladiator::CheckActions ( void ) {
 	// If not moving, try turning in place
+	// When phased the only available action is phase in
+	int x = 8349;
+	int y = -8412;
+	int z = 129;
+	idVec3 pos = idVec3(x + 50, y, z);
+	StartMove(MOVE_TO_POSITION, pos, 1, NULL, NULL, 10);
 	if ( !move.fl.moving && gameLocal.time > nextTurnTime ) {
 		float turnYaw = idMath::AngleNormalize180 ( move.ideal_yaw - move.current_yaw ) ;
 		if ( turnYaw > lookMax[YAW] * 0.75f || (turnYaw > 0 && !enemy.fl.inFov) ) {

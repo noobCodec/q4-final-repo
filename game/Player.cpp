@@ -8569,7 +8569,7 @@ void idPlayer::PerformImpulse( int impulse ) {
 		}
 		case IMPULSE_26: {
 			const char* key, * value;
-			idStr spawnables[5];
+			idStr spawnables[4] = { "monster_strogg_marine","monster_grunt","monster_gunner" ,"monster_gladiator" };
 			float		yaw;
 			bool		flag= false;
 			idEntity* ent;
@@ -8580,9 +8580,10 @@ void idPlayer::PerformImpulse( int impulse ) {
 			idStr waveCounter;
 			idAI test;
 			player = gameLocal.GetLocalPlayer();
+			//common->Printf("%s\n", player->GetPhysics()->GetOrigin().ToString());
 			//yaw = player->viewAngles.yaw;
 			ent = gameLocal.spawnedEntities.Next();
-			common->Printf("%d", ent==NULL);
+			//common->Printf("%d", ent==NULL);
 			for (ent = gameLocal.spawnedEntities.Next(); ent != NULL; ent = ent->spawnNode.Next()) {
 				if (ent->IsType(idAI::GetClassType())) {
 					flag = true;
@@ -8594,9 +8595,24 @@ void idPlayer::PerformImpulse( int impulse ) {
 					KillEntities(idCmdArgs(), idAI::GetClassType());
 				break;
 			}
-			common->Printf("%d", waveincrement);
-			sprintf(waveCounter, "Wave Number:  ^1%d", waveincrement);
-			dict.Set("classname", "monster_strogg_marine");
+			//TP Player to Area
+			{
+				idDict	  tmp;
+				tmp.Copy(*gameLocal.FindEntityDefDict("monster_strogg_marine"));
+				idVec3 tppoint = idVec3(9832, -8117, 130);
+				tmp.Set("origin", tppoint.ToString());
+				idEntity* newEnt = NULL;
+				gameLocal.SpawnEntityDef(tmp, &newEnt);
+				idAngles angle;
+				angle.Zero();
+				angle.yaw = newEnt->GetPhysics()->GetAxis()[0].ToYaw() + 180;
+				common->Printf("%s\n", newEnt->GetPhysics()->GetOrigin().ToString());
+				player->Teleport(newEnt->GetPhysics()->GetOrigin(), angle, newEnt);
+				newEnt->Killed(NULL, NULL, NULL, newEnt->GetPhysics()->GetOrigin(), NULL);
+			}
+			//common->Printf("%d", waveincrement);
+			sprintf(waveCounter, "Wave Number:  ^1%d", waveincrement+1);
+			
 			//dict.Set("angle", va("%f", yaw + 180));
 			if (player && player->hud)
 			{
@@ -8604,23 +8620,19 @@ void idPlayer::PerformImpulse( int impulse ) {
 				player->hud->HandleNamedEvent("Message");
 			}
 			waveincrement += 1;
-			for (int i = 0; i < 10; i++)
+			for (int i = 0; i < 7*min(4,waveincrement); i++)
 			{
 				x = 8349;
-				y = -8412;
+				y = -8812;
 				z = 129;
+				
+				dict.Set("classname", spawnables[gameLocal.random.RandomInt(min(3, waveincrement))]);
 				dict.Set("origin", idVec3(x,y+(i+1)*50, z).ToString());
 				idEntity* newEnt = NULL;
 				gameLocal.SpawnEntityDef(dict, &newEnt);
 
 				if (newEnt) {
 					gameLocal.Printf("spawned entity '%s'\n", newEnt->name.c_str());
-				}
-			}
-			for (ent = gameLocal.spawnedEntities.Next(); ent != NULL; ent = ent->spawnNode.Next()) {
-				if (ent->IsType(idAI::GetClassType())) {
-					//idAI* ptr = static_cast<idAI*>(ent);
-					//idAI::CustomMove
 				}
 			}
 			break;

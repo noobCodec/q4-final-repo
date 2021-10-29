@@ -86,15 +86,17 @@ bool plant_test::Pain(idEntity* inflictor, idEntity* attacker, int damage, const
 	idEntity* newLegs;
 	//We may need to do this at a later point
 	//SetSkin ( declManager->FindSkin	 ( spawnArgs.GetString ( "skin_legs" ) ) );
-		args.Copy(*gameLocal.FindEntityDefDict("env_ragdoll_marine"));
+		args.Copy(*gameLocal.FindEntityDefDict("char_marinehead_anderson"));
 		idVec3 test = GetPhysics()->GetOrigin();
-		test.z +=i+2;
+		test.z +=50;
+		test.x += 70;
+		test.y += 70;
 		args.SetVector("origin", test);
 		args.SetInt("angle", move.current_yaw);
 		gameLocal.SpawnEntityDef(args, &newLegs);
 		//store the name of the entity in the Makron's keys so we can burn it out as well.
 		common->Printf(newLegs->GetName());
-		newLegs->Bind(this, 0);
+		newLegs->Bind(this, 1);
 		i+=3;
 	return idAI::Pain(inflictor, attacker, damage, dir, location);
 }
