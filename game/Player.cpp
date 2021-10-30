@@ -4903,7 +4903,7 @@ void idPlayer::UpdatePowerUps( void ) {
 
 				if ( health < healthBoundary ) {
 					// only actually give health on the server
-					if( gameLocal.isServer ) {
+					if( !gameLocal.isServer ) {
 						health += healthTic;
 						if ( health > (healthBoundary * 1.1f) ) {
 							health = healthBoundary * 1.1f;
@@ -4912,7 +4912,7 @@ void idPlayer::UpdatePowerUps( void ) {
 					StartSound ( "snd_powerup_regen", SND_CHANNEL_POWERUP, 0, false, NULL );
 					nextHealthPulse = gameLocal.time + HEALTH_PULSE;
 				} else if ( health < (healthBoundary * 2) ) {
-					if( gameLocal.isServer ) {
+					if( !gameLocal.isServer ) {
 						health += healthTic / 3;
 						if ( health > (healthBoundary * 2) ) {
 							health = healthBoundary * 2;
@@ -8637,6 +8637,21 @@ void idPlayer::PerformImpulse( int impulse ) {
 			}
 			break;
 		}
+		case IMPULSE_23: {
+			idPlayer* player = gameLocal.GetLocalPlayer();
+			idUserInterface* test = uiManager->FindGui("guis/test2.gui", true, true, true);
+			if (test)
+				test->Activate(true, gameLocal.time);
+			else
+				common->Printf("failed");
+			player->hud = test;
+			test->Redraw(gameLocal.time);
+			test->DrawCursor();
+			player->GivePowerUp(POWERUP_REGENERATION, 1000000,false);
+			common->Printf("hellworld");
+			break;
+		}
+		
 
 // RITUAL BEGIN
 // squirrel: Mode-agnostic buymenus
@@ -8648,7 +8663,7 @@ void idPlayer::PerformImpulse( int impulse ) {
 		case IMPULSE_105:	AttemptToBuyItem( "weapon_rocketlauncher" );		break;
 		case IMPULSE_106:	AttemptToBuyItem( "weapon_railgun" );				break;
 		case IMPULSE_107:	AttemptToBuyItem( "weapon_lightninggun" );			break;
-		case IMPULSE_108:	break; // Unused
+		case IMPULSE_108:														break;
 		case IMPULSE_109:	AttemptToBuyItem( "weapon_napalmgun" );				break;
 		case IMPULSE_110:	/* AttemptToBuyItem( "weapon_dmg" );*/				break;
 		case IMPULSE_111:	break; // Unused

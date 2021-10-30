@@ -262,6 +262,7 @@
     <ClCompile Include="game\ai\Monster_TeleportDropper.cpp" />
     <ClCompile Include="game\ai\Monster_Turret.cpp" />
     <ClCompile Include="game\ai\Monster_TurretFlying.cpp" />
+    <ClCompile Include="game\ai\plant_test.cpp" />
     <ClCompile Include="game\ai\VehicleAI.cpp" />
     <ClCompile Include="game\anim\Anim.cpp" />
     <ClCompile Include="game\anim\Anim_Blend.cpp" />
