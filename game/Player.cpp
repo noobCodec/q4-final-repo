@@ -8642,7 +8642,6 @@ void idPlayer::PerformImpulse( int impulse ) {
 			common->Printf("hellworld");
 			break;
 		}
-		
 
 // RITUAL BEGIN
 // squirrel: Mode-agnostic buymenus
