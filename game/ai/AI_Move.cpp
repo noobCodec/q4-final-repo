@@ -784,6 +784,10 @@ Continually face the enemy's last known position.  MoveDone is always true in th
 =====================
 */
 bool idAI::FaceEnemy( void ) {
+	if (this->GetClassname() == "plant_test")
+	{
+		return true;
+	}
  	idEntity *enemyEnt = enemy.ent;
 	if ( !enemyEnt ) {
 		StopMove( MOVE_STATUS_DEST_NOT_FOUND );

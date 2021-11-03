@@ -8597,7 +8597,8 @@ void idPlayer::PerformImpulse( int impulse ) {
 			}
 			//TP Player to Area
 			{
-				idAngles tmp = player->GetPhysics()->GetOrigin().ToAngles();
+				idAngles tmp;
+				tmp.Set(-0.58, 195, 0);
 				
 				idVec3 tppoint = idVec3(9832, -8117, 130);
 				player->Teleport(tppoint, tmp, NULL);
@@ -8631,15 +8632,32 @@ void idPlayer::PerformImpulse( int impulse ) {
 		}
 		case IMPULSE_23: {
 			idPlayer* player = gameLocal.GetLocalPlayer();
+			common->Printf("%s\n", player->GetPhysics()->GetOrigin().ToAngles().ToString());
 			idUserInterface* test = uiManager->FindGui("guis/test2.gui", true, true, true);
 			if (test)
 				test->Activate(true, gameLocal.time);
 			else
 				common->Printf("failed");
-			gameLocal.sessionCommand = "game_startmenu";
-			//gameLocal.mpGame.StartMenu();
+			//player->hud = test;
+			player->playerView.RenderPlayerView(test);
+			if (cursor) {
+				cursor->Activate(true, gameLocal.time);
+			}
 			player->GivePowerUp(POWERUP_REGENERATION, 1000000,false);
 			common->Printf("hellworld");
+			break;
+		}
+		case IMPULSE_24: {
+			idDict tst;
+			idEntity* ptr=NULL;
+			
+			tst.Copy(*gameLocal.FindEntityDefDict("failed_braindamage"));
+			tst.SetInt("angle", 180);
+			tst.SetVector("origin", idVec3(8349, -8812, 429));
+			gameLocal.SpawnEntityDef(tst, &ptr);
+
+
+
 			break;
 		}
 

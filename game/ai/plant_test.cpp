@@ -16,6 +16,7 @@ public:
 	void				Restore(idRestoreGame* savefile);
 	
 	virtual bool		Pain(idEntity* inflictor, idEntity* attacker, int damage, const idVec3& dir, int location);
+	
 
 protected:
 
@@ -25,8 +26,11 @@ protected:
 	stateResult_t		State_Killed(const stateParms_t& parms);
 
 private:
-	idEntity* seeds[10]		;
+	idEntity* prev = NULL;
+	idEntity* next = NULL;
 	char i = 'a';
+	int time;
+	int growidx=1;
 	CLASS_STATES_PROTOTYPE(plant_test);
 };
 
@@ -47,6 +51,8 @@ rvMonsterTurret::Spawn
 ================
 */
 void plant_test::Spawn(void) {
+	time = gameLocal.GetTime();
+
 }
 
 /*
@@ -55,6 +61,7 @@ rvMonsterTurret::Save
 ================
 */
 void plant_test::Save(idSaveGame* savefile) const {
+	savefile->WriteInt(time);
 }
 
 /*
@@ -63,6 +70,7 @@ rvMonsterTurret::Restore
 ================
 */
 void plant_test::Restore(idRestoreGame* savefile) {
+	savefile->ReadInt(time);
 }
 
 /*
@@ -71,8 +79,28 @@ rvMonsterTurret::CheckActions
 ================
 */
 bool plant_test::CheckActions(void) {
-	// Attacks
-	return idAI::CheckActions();
+	if (!next&&((time + growidx * 500) < gameLocal.GetTime()))
+	{
+		common->Printf("spawning\n");
+		idDict	  args;
+		idEntity* newLegs;
+		
+		args.Copy(*gameLocal.FindEntityDefDict("failed_braindamage"));
+		idVec3 test = GetPhysics()->GetOrigin();
+		//test.x = 8349.64;
+		//test.y = -8920.62;
+		test.z += 40;
+		args.SetVector("origin", test);
+		args.SetInt("angle", 180);
+		gameLocal.SpawnEntityDef(args, &newLegs);
+		//store the name of the entity in the Makron's keys so we can burn it out as well.
+		common->Printf(newLegs->GetName());
+		static_cast<plant_test*>(newLegs)->prev=this;
+		next = newLegs;
+		i += 3;
+		growidx += 1;
+	}
+	return true;
 }
 
 /*
@@ -82,22 +110,6 @@ rvMonsterTurret::Pain
 */
 bool plant_test::Pain(idEntity* inflictor, idEntity* attacker, int damage, const idVec3& dir, int location) {
 	common->Printf("i am in pain");
-	idDict	  args;
-	idEntity* newLegs;
-	//We may need to do this at a later point
-	//SetSkin ( declManager->FindSkin	 ( spawnArgs.GetString ( "skin_legs" ) ) );
-		args.Copy(*gameLocal.FindEntityDefDict("char_marinehead_anderson"));
-		idVec3 test = GetPhysics()->GetOrigin();
-		test.z +=50;
-		test.x += 70;
-		test.y += 70;
-		args.SetVector("origin", test);
-		args.SetInt("angle", move.current_yaw);
-		gameLocal.SpawnEntityDef(args, &newLegs);
-		//store the name of the entity in the Makron's keys so we can burn it out as well.
-		common->Printf(newLegs->GetName());
-		newLegs->Bind(this, 1);
-		i+=3;
 	return idAI::Pain(inflictor, attacker, damage, dir, location);
 }
 
@@ -140,7 +152,17 @@ rvMonsterTurret::State_Killed
 */
 stateResult_t plant_test::State_Killed(const stateParms_t& parms) {
 	gameLocal.PlayEffect(gameLocal.GetEffect(spawnArgs, "fx_death"), GetPhysics()->GetOrigin(), (-GetPhysics()->GetGravityNormal()).ToMat3());
-	
+	common->Printf("\n%d:::%d", next == NULL, prev == NULL);
+	if (next) {
+		common->Printf("Murder");
+		next->Killed(NULL, NULL, NULL, next->GetPhysics()->GetOrigin(), NULL);
+	}
+	if (prev)
+	{
+		static_cast<plant_test*>(prev)->next = NULL;
+		static_cast<plant_test*>(prev)->time = gameLocal.GetTime();
+		static_cast<plant_test*>(prev)->growidx = 1;
+	}
 	return idAI::State_Killed(parms);
 }
 
