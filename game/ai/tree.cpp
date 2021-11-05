@@ -4,19 +4,19 @@
 
 #include "../Game_local.h"
 
-class plant_test : public idAI {
+class tree : public idAI {
 public:
 
-	CLASS_PROTOTYPE(plant_test);
+	CLASS_PROTOTYPE(tree);
 
-	plant_test(void);
+	tree(void);
 
 	void				Spawn(void);
 	void				Save(idSaveGame* savefile) const;
 	void				Restore(idRestoreGame* savefile);
-	
+
 	virtual bool		Pain(idEntity* inflictor, idEntity* attacker, int damage, const idVec3& dir, int location);
-	
+
 
 protected:
 
@@ -26,15 +26,14 @@ protected:
 	stateResult_t		State_Killed(const stateParms_t& parms);
 
 private:
-	idEntity* prev = NULL;
-	idEntity* next = NULL;
-	char i = 'a';
 	int time;
-	int growidx=1;
-	CLASS_STATES_PROTOTYPE(plant_test);
+	int state = 0;
+	int growidx = 1;
+	idEntity* kids[3] = { NULL,NULL,NULL };
+	CLASS_STATES_PROTOTYPE(tree);
 };
 
-CLASS_DECLARATION(idAI, plant_test)
+CLASS_DECLARATION(idAI, tree)
 END_CLASS
 
 /*
@@ -42,7 +41,7 @@ END_CLASS
 rvMonsterTurret::rvMonsterTurret
 ================
 */
-plant_test::plant_test() {
+tree::tree() {
 }
 
 /*
@@ -50,8 +49,9 @@ plant_test::plant_test() {
 rvMonsterTurret::Spawn
 ================
 */
-void plant_test::Spawn(void) {
+void tree::Spawn(void) {
 	time = gameLocal.GetTime();
+	common->Printf("spawned");
 
 }
 
@@ -60,7 +60,7 @@ void plant_test::Spawn(void) {
 rvMonsterTurret::Save
 ================
 */
-void plant_test::Save(idSaveGame* savefile) const {
+void tree::Save(idSaveGame* savefile) const {
 	savefile->WriteInt(time);
 }
 
@@ -69,7 +69,7 @@ void plant_test::Save(idSaveGame* savefile) const {
 rvMonsterTurret::Restore
 ================
 */
-void plant_test::Restore(idRestoreGame* savefile) {
+void tree::Restore(idRestoreGame* savefile) {
 	savefile->ReadInt(time);
 }
 
@@ -78,26 +78,36 @@ void plant_test::Restore(idRestoreGame* savefile) {
 rvMonsterTurret::CheckActions
 ================
 */
-bool plant_test::CheckActions(void) {
-	if (!next&&((time + growidx * 500) < gameLocal.GetTime()))
+bool tree::CheckActions(void) {
+	int i;
+	bool found = false;
+	for (i = 0; i < 3; i++)
+	{
+		if (!kids[i])
+		{
+			found = true;
+			break;
+		}
+	}
+	if ( found && ((time + growidx * 3000) < gameLocal.GetTime()))
 	{
 		common->Printf("spawning\n");
 		idDict	  args;
 		idEntity* newLegs;
-		
-		args.Copy(*gameLocal.FindEntityDefDict("failed_braindamage"));
+
+		args.Copy(*gameLocal.FindEntityDefDict("test_head"));
 		idVec3 test = GetPhysics()->GetOrigin();
-		//test.x = 8349.64;
-		//test.y = -8920.62;
-		test.z += 40;
+		test.x += 2;
+		test.y -= 8;
+		test.z += 20*(i+1);
 		args.SetVector("origin", test);
 		args.SetInt("angle", 180);
 		gameLocal.SpawnEntityDef(args, &newLegs);
-		//store the name of the entity in the Makron's keys so we can burn it out as well.
-		static_cast<plant_test*>(newLegs)->prev=this;
-		next = newLegs;
-		i += 3;
+		static_cast<idAI*>(newLegs)->SetDamageEntity(this);
+		static_cast<idAI*>(newLegs)->OverrideFlag(AIFLAGOVERRIDE_NOGRAVITY, true);
+		kids[i] = newLegs;
 		growidx += 1;
+		//store the name of the entity in the Makron's keys so we can burn it out as well.
 	}
 	return true;
 }
@@ -107,7 +117,21 @@ bool plant_test::CheckActions(void) {
 rvMonsterTurret::Pain
 ================
 */
-bool plant_test::Pain(idEntity* inflictor, idEntity* attacker, int damage, const idVec3& dir, int location) {
+bool tree::Pain(idEntity* inflictor, idEntity* attacker, int damage, const idVec3& dir, int location) {
+	common->Printf("in pain");
+	if (inflictor->GetClassname() == "fruit")
+	{
+		time = gameLocal.GetTime();
+		growidx = 1;
+		for (int i = 0; i < 3; i++)
+		{
+			if (kids[i] == inflictor)
+			{
+				kids[i] = NULL;
+				break;
+			}
+		}
+	}
 	return idAI::Pain(inflictor, attacker, damage, dir, location);
 }
 
@@ -119,9 +143,9 @@ bool plant_test::Pain(idEntity* inflictor, idEntity* attacker, int damage, const
 ===============================================================================
 */
 
-CLASS_STATES_DECLARATION(plant_test)
-STATE("State_Combat", plant_test::State_Combat)
-STATE("State_Killed", plant_test::State_Killed)
+CLASS_STATES_DECLARATION(tree)
+STATE("State_Combat", tree::State_Combat)
+STATE("State_Killed", tree::State_Killed)
 END_CLASS_STATES
 
 /*
@@ -129,7 +153,7 @@ END_CLASS_STATES
 rvMonsterTurret::State_Combat
 ================
 */
-stateResult_t plant_test::State_Combat(const stateParms_t& parms) {
+stateResult_t tree::State_Combat(const stateParms_t& parms) {
 	// Aquire a new enemy if we dont have one
 	if (!enemy.ent) {
 		CheckForEnemy(true);
@@ -148,23 +172,16 @@ stateResult_t plant_test::State_Combat(const stateParms_t& parms) {
 rvMonsterTurret::State_Killed
 ================
 */
-stateResult_t plant_test::State_Killed(const stateParms_t& parms) {
+stateResult_t tree::State_Killed(const stateParms_t& parms) {
 	idPlayer* player = gameLocal.GetLocalPlayer();
-	idDict tospawn;
-	idStr goodies[2] = { "first_seed","second_seed" };
-	tospawn.Copy(*gameLocal.FindEntityDefDict(goodies[gameLocal.random.RandomInt(2)]));
-	gameLocal.PlayEffect(gameLocal.GetEffect(spawnArgs, "fx_death"), GetPhysics()->GetOrigin(), (-GetPhysics()->GetGravityNormal()).ToMat3());
-	if (next) {
-		next->Killed(NULL, NULL, NULL, next->GetPhysics()->GetOrigin(), NULL);
-	}
-	if (prev)
+	idDict tmp;
+	common->Printf("dead");
+	common->Printf("%d", state);
+	if (state == 3)
 	{
-		static_cast<plant_test*>(prev)->next = NULL;
-		static_cast<plant_test*>(prev)->time = gameLocal.GetTime();
-		static_cast<plant_test*>(prev)->growidx = 1;
+		tmp.Copy(*gameLocal.FindEntityDefDict("first_seed"));
+		player->GiveInventoryItem(&tmp);
 	}
-	player->GiveInventoryItem(&tospawn);
-	
 	return idAI::State_Killed(parms);
 }
 

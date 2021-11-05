@@ -1372,6 +1372,9 @@ void idClass::RegisterClasses( void )
 	REGISTER(rvMonsterTurret); // ..\..\code\game\ai\Monster_Turret.cpp
 	REGISTER(rvMonsterTurretFlying); // ..\..\code\game\ai\Monster_TurretFlying.cpp
 	REGISTER(plant_test);
+	REGISTER(wheat);
+	REGISTER(tree);
+	REGISTER(fruit);
 #endif // !_MPBETA
 	REGISTER(rvObjectiveFailed); // ..\..\code\game\Item.cpp
 	REGISTER(rvPhysics_Particle); // ..\..\code\game\physics\Physics_Particle.cpp

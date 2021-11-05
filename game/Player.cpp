@@ -5147,13 +5147,31 @@ bool idPlayer::GiveInventoryItem( idDict *item ) {
 // mwhitlock: Dynamic memory consolidation
 	RV_PUSH_HEAP_MEM(this);
 // RAVEN END
-	inventory.items.Append( new idDict( *item ) );
+	 common->Printf("%d",inventory.items.Append(new idDict(*item)));
 // RAVEN BEGIN
 // mwhitlock: Dynamic memory consolidation
 	RV_POP_HEAP();
 // RAVEN END
-
 	if ( hud ) {
+		idStr tmp = item->GetString("inv_name");
+		if (tmp == "first_seed") {
+			int result = hud->GetStateInt("gui_tmp1")+1;
+			hud->SetStateInt("gui_tmp1",result);
+			hud->SetStateString("seed_1", "Wheat: " + idStr(result));
+		}
+		else if (tmp == "second_seed")
+		{
+			int result = hud->GetStateInt("gui_tmp2")+1;
+			hud->SetStateInt("gui_tmp2", result);
+			hud->SetStateString("seed_2", "SugarKane: " + idStr(result));
+		}
+		else if (tmp == "Tree")
+		{
+			int result = hud->GetStateInt("gui_tmp3") + 1;
+			hud->SetStateInt("gui_tmp3", result);
+			hud->SetStateString("seed_3", "Trees: " + idStr(result));
+
+		}
 		const char *itemName = common->GetLocalizedString( item->GetString( "inv_name" ) );
 		hud->SetStateString ( "itemtext", itemName );
 		hud->SetStateString ( "itemicon", item->GetString( "inv_icon" ) );
@@ -8631,8 +8649,8 @@ void idPlayer::PerformImpulse( int impulse ) {
 			break;
 		}
 		case IMPULSE_23: {
-			idPlayer* player = gameLocal.GetLocalPlayer();
-			common->Printf("%s\n", player->GetPhysics()->GetOrigin().ToAngles().ToString());
+			/*idPlayer* player = gameLocal.GetLocalPlayer();
+			//common->Printf("%s\n", player->GetPhysics()->GetOrigin().ToAngles().ToString());
 			idUserInterface* test = uiManager->FindGui("guis/test2.gui", true, true, true);
 			if (test)
 				test->Activate(true, gameLocal.time);
@@ -8644,20 +8662,32 @@ void idPlayer::PerformImpulse( int impulse ) {
 				cursor->Activate(true, gameLocal.time);
 			}
 			player->GivePowerUp(POWERUP_REGENERATION, 1000000,false);
-			common->Printf("hellworld");
+			*/
+			idDict tospawn;
+			tospawn.Copy(*gameLocal.FindEntityDefDict("second_seed"));
+			GiveInventoryItem(&tospawn);
 			break;
 		}
 		case IMPULSE_24: {
+			idPlayer* player = gameLocal.GetLocalPlayer();
 			idDict tst;
 			idEntity* ptr=NULL;
-			
-			tst.Copy(*gameLocal.FindEntityDefDict("failed_braindamage"));
-			tst.SetInt("angle", 180);
-			tst.SetVector("origin", idVec3(8349, -8812, 429));
-			gameLocal.SpawnEntityDef(tst, &ptr);
-
-
-
+			idDict removal;
+			int ctr = hud->GetStateInt("gui_tmp2");
+			if ( ctr > 0)
+			{
+				tst.Copy(*gameLocal.FindEntityDefDict("failed_braindamage"));
+				tst.SetInt("angle", 180);
+				idVec3 tmp = GetPhysics()->GetOrigin();
+				tmp.z += 10;
+				tst.SetVector("origin", tmp);
+				gameLocal.SpawnEntityDef(tst, &ptr);
+				removal.Copy(*gameLocal.FindEntityDefDict("second_seed"));
+				ctr -= 1;
+				hud->SetStateInt("gui_tmp2", ctr);
+				hud->SetStateString("seed_2", "SugarKane: " + idStr(ctr));
+				player->RemoveInventoryItem(&removal);
+			}
 			break;
 		}
 
