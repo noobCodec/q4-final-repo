@@ -8637,10 +8637,10 @@ void idPlayer::PerformImpulse( int impulse ) {
 				player->hud->HandleNamedEvent("Message");
 			}
 			waveincrement += 1;
-			for (int i = 0; i < 7*min(4,waveincrement); i++)
+			for (int i = 0; i < 10*min(4,waveincrement); i++)
 			{
 				x = 8349;
-				y = -8812;
+				y = -9500;
 				z = 129;
 				
 				dict.Set("classname", spawnables[gameLocal.random.RandomInt(min(3, waveincrement))]);
@@ -8663,8 +8663,6 @@ void idPlayer::PerformImpulse( int impulse ) {
 					firstentry = false;
 				}
 				player->SetName("sugma");
-				common->Printf(player->GetName());
-				common->Printf("%s\n", player->GetPhysics()->GetOrigin().ToAngles().ToString());
 				idUserInterface* test = uiManager->FindGui("guis/test3.gui", true, true, true);
 				if (test)
 					test->Activate(true, gameLocal.time);
@@ -8714,7 +8712,7 @@ void idPlayer::PerformImpulse( int impulse ) {
 					player->SetRank(tmp);
 				}
 				
-				common->Printf("%d", player->hud->GetStateInt("perk_9"));
+				//common->Printf("%d", player->hud->GetStateInt("perk_9"));
 				player->hud = oldHud;
 				player->focusUI = NULL;
 				oldHud = NULL;
@@ -8791,6 +8789,24 @@ void idPlayer::PerformImpulse( int impulse ) {
 					hud->SetStateString("seed_3", "Tree: " + idStr(ctr));
 					player->RemoveInventoryItem(&removal);
 				}
+			}
+			break;
+		}
+		case IMPULSE_30:{
+			idPlayer* player = gameLocal.GetLocalPlayer();
+			if (!oldHud) {
+				idUserInterface* test = uiManager->FindGui("guis/mytut.gui", true, true, true);
+				if (test)
+					test->Activate(true, gameLocal.time);
+				else
+					common->Printf("failed");
+				oldHud = player->hud;
+				player->hud = test;
+			}
+			else
+			{
+				player->hud = oldHud;
+				oldHud = NULL;
 			}
 			break;
 		}
