@@ -4905,6 +4905,7 @@ void idPlayer::UpdatePowerUps( void ) {
 					// only actually give health on the server
 					if( !gameLocal.isServer ) {
 						health += healthTic;
+						if(PowerUpActive(POWERUP_GUARD))
 						inventory.armor += 20;
 						if ( health > (healthBoundary * 1.1f) ) {
 							health = healthBoundary * 1.1f;
@@ -4915,6 +4916,7 @@ void idPlayer::UpdatePowerUps( void ) {
 				} else if ( health < (healthBoundary * 2) ) {
 					if( !gameLocal.isServer ) {
 						health += healthTic / 3;
+						if(PowerUpActive(POWERUP_GUARD))
 						inventory.armor += 20;
 						if ( health > (healthBoundary * 2) ) {
 							health = healthBoundary * 2;
@@ -8451,6 +8453,8 @@ idPlayer::PerformImpulse
 */
 int waveincrement = 0; //shit
 idUserInterface* oldHud = NULL;
+bool speedswitch = false;
+bool firstentry = true;
 void idPlayer::PerformImpulse( int impulse ) {
 
 //RAVEN BEGIN
@@ -8652,12 +8656,16 @@ void idPlayer::PerformImpulse( int impulse ) {
 		}
 		case IMPULSE_23: {
 			idPlayer* player = gameLocal.GetLocalPlayer();
-		/*	if (!oldHud)
+			if (!oldHud)
 			{
+				if (firstentry) {
+					player->SetRank(0);
+					firstentry = false;
+				}
 				player->SetName("sugma");
 				common->Printf(player->GetName());
 				common->Printf("%s\n", player->GetPhysics()->GetOrigin().ToAngles().ToString());
-				idUserInterface* test = uiManager->FindGui("guis/test.gui", true, true, true);
+				idUserInterface* test = uiManager->FindGui("guis/test3.gui", true, true, true);
 				if (test)
 					test->Activate(true, gameLocal.time);
 				else
@@ -8665,57 +8673,124 @@ void idPlayer::PerformImpulse( int impulse ) {
 				oldHud = player->hud;
 				player->hud = test;
 				player->focusUI = test;
-				
 			}
 			else
 			{
+				if (!speedswitch && player->hud->GetStateInt("perk_1"))
+				{
+					float speed = cvarSystem->GetCVarFloat("pm_speed");
+					cvarSystem->SetCVarFloat("pm_speed", speed * 3);
+					speedswitch = true;
+				}
+				if(player->hud->GetStateInt("perk_2"))
+					player->GivePowerUp(POWERUP_REGENERATION, 100000);
+				if (player->hud->GetStateInt("perk_3"))
+					player->GivePowerUp(POWERUP_QUADDAMAGE, 1000000);
+				if (player->hud->GetStateInt("perk_4"))
+					player->GivePowerUp(POWERUP_AMMOREGEN, 100000);
+				if (player->hud->GetStateInt("perk_5"))
+					player->GivePowerUp(POWERUP_GUARD, 100000);
+				if (player->hud->GetStateInt("perk_6"))
+					player->inventory.maxarmor = 500;
+				if (player->hud->GetStateInt("perk_7"))
+					player->inventory.maxHealth = 500;
+				if (player->hud->GetStateInt("perk_8"))
+				{
+					int tmp = player->GetRank();
+					tmp |= 1 << 0;
+					player->SetRank(tmp);
+				}
+					
+				if (player->hud->GetStateInt("perk_9"))
+				{
+					int tmp = player->GetRank();
+					tmp |= 1 << 1;
+					player->SetRank(tmp);
+				}
+				if (player->hud->GetStateInt("perk_10"))
+				{
+					int tmp = player->GetRank();
+					tmp |= 1 << 2;
+					player->SetRank(tmp);
+				}
+				
+				common->Printf("%d", player->hud->GetStateInt("perk_9"));
 				player->hud = oldHud;
 				player->focusUI = NULL;
 				oldHud = NULL;
 			}
-			*/
-			//1 
-			float speed = cvarSystem->GetCVarFloat("pm_speed");
-			cvarSystem->SetCVarFloat("pm_speed", speed * 3);
-			//2 
-			player->GivePowerUp(POWERUP_REGENERATION, 100000);
-			//3
-			player->GivePowerUp(POWERUP_QUADDAMAGE, 1000000);
-			//4
-			player->GivePowerUp(POWERUP_AMMOREGEN, 100000);
-			//5
-			player->GivePowerUp(POWERUP_GUARD, 100000);
-			//6
-			player->inventory.maxarmor = 500;
-			//7
-			player->inventory.maxHealth = 500;
-			//8
-			player->SetRank(3);
-			//9
-			player->SetRank(4);
-			//10
-			player->SetRank(5);
+			
 			break;
 		}
 		case IMPULSE_24: {
-			idPlayer* player = gameLocal.GetLocalPlayer();
-			idDict tst;
-			idEntity* ptr=NULL;
-			idDict removal;
-			int ctr = hud->GetStateInt("gui_tmp2");
-			if ( ctr > 0)
 			{
-				tst.Copy(*gameLocal.FindEntityDefDict("failed_braindamage"));
-				tst.SetInt("angle", 180);
-				idVec3 tmp = GetPhysics()->GetOrigin();
-				tmp.z += 10;
-				tst.SetVector("origin", tmp);
-				gameLocal.SpawnEntityDef(tst, &ptr);
-				removal.Copy(*gameLocal.FindEntityDefDict("second_seed"));
-				ctr -= 1;
-				hud->SetStateInt("gui_tmp2", ctr);
-				hud->SetStateString("seed_2", "SugarKane: " + idStr(ctr));
-				player->RemoveInventoryItem(&removal);
+				idPlayer* player = gameLocal.GetLocalPlayer();
+				idDict tst;
+				idEntity* ptr = NULL;
+				idDict removal;
+				int ctr = hud->GetStateInt("gui_tmp2");
+				if (ctr > 0)
+				{
+					tst.Copy(*gameLocal.FindEntityDefDict("failed_braindamage"));
+					tst.SetInt("angle", 180);
+					idVec3 tmp = GetPhysics()->GetOrigin();
+					tmp.z += 10;
+					tst.SetVector("origin", tmp);
+					gameLocal.SpawnEntityDef(tst, &ptr);
+					removal.Copy(*gameLocal.FindEntityDefDict("second_seed"));
+					ctr -= 1;
+					hud->SetStateInt("gui_tmp2", ctr);
+					hud->SetStateString("seed_2", "SugarKane: " + idStr(ctr));
+					player->RemoveInventoryItem(&removal);
+				}
+			}
+			break;
+		}
+		case IMPULSE_25: {
+			{
+				idPlayer* player = gameLocal.GetLocalPlayer();
+				idDict tst;
+				idEntity* ptr = NULL;
+				idDict removal;
+				int ctr = hud->GetStateInt("gui_tmp1");
+				if (ctr > 0)
+				{
+					tst.Copy(*gameLocal.FindEntityDefDict("wheat_test"));
+					tst.SetInt("angle", 180);
+					idVec3 tmp = GetPhysics()->GetOrigin();
+					tmp.z += 10;
+					tst.SetVector("origin", tmp);
+					gameLocal.SpawnEntityDef(tst, &ptr);
+					removal.Copy(*gameLocal.FindEntityDefDict("first_seed"));
+					ctr -= 1;
+					hud->SetStateInt("gui_tmp1", ctr);
+					hud->SetStateString("seed_1", "Wheat: " + idStr(ctr));
+					player->RemoveInventoryItem(&removal);
+				}
+			}
+			break;
+		}
+		case IMPULSE_27: {
+			{
+				idPlayer* player = gameLocal.GetLocalPlayer();
+				idDict tst;
+				idEntity* ptr = NULL;
+				idDict removal;
+				int ctr = hud->GetStateInt("gui_tmp3");
+				if (ctr > 0)
+				{
+					tst.Copy(*gameLocal.FindEntityDefDict("tree_test"));
+					tst.SetInt("angle", 90);
+					idVec3 tmp = GetPhysics()->GetOrigin();
+					tmp.z += 10;
+					tst.SetVector("origin", tmp);
+					gameLocal.SpawnEntityDef(tst, &ptr);
+					removal.Copy(*gameLocal.FindEntityDefDict("third_seed"));
+					ctr -= 1;
+					hud->SetStateInt("gui_tmp3", ctr);
+					hud->SetStateString("seed_3", "Tree: " + idStr(ctr));
+					player->RemoveInventoryItem(&removal);
+				}
 			}
 			break;
 		}

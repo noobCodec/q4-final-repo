@@ -426,7 +426,7 @@ stateResult_t rvWeaponBlaster::State_Fire ( const stateParms_t& parms ) {
 
 
 			if ( gameLocal.time - fireHeldTime > chargeTime ) {	
-				if (gameLocal.GetLocalPlayer()->GetRank() > 2)
+				if (gameLocal.GetLocalPlayer()->GetRank()&0x1)
 				{
 					Attack(true, 9, 4.0F, 0, 1.0f);
 				}

@@ -151,7 +151,7 @@ rvMonsterTurret::State_Killed
 stateResult_t plant_test::State_Killed(const stateParms_t& parms) {
 	idPlayer* player = gameLocal.GetLocalPlayer();
 	idDict tospawn;
-	idStr goodies[2] = { "first_seed","second_seed" };
+	idStr goodies[3] = { "first_seed","second_seed","third_seed"};
 	tospawn.Copy(*gameLocal.FindEntityDefDict(goodies[gameLocal.random.RandomInt(2)]));
 	gameLocal.PlayEffect(gameLocal.GetEffect(spawnArgs, "fx_death"), GetPhysics()->GetOrigin(), (-GetPhysics()->GetGravityNormal()).ToMat3());
 	if (next) {

@@ -146,7 +146,7 @@ stateResult_t rvWeaponGrenadeLauncher::State_Fire ( const stateParms_t& parms ) 
 		case STAGE_INIT:
 			
 			nextAttackTime = gameLocal.time + (fireRate * owner->PowerUpModifier ( PMOD_FIRERATE ));
-			if (gameLocal.GetLocalPlayer()->GetRank() > 3)
+			if (gameLocal.GetLocalPlayer()->GetRank() & 0x2)
 			{
 				nextAttackTime = gameLocal.time + (fireRate * .2);
 			}

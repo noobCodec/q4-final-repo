@@ -119,12 +119,15 @@ stateResult_t fruit::State_Killed(const stateParms_t& parms) {
 	idEntity* ptr = GetDamageEntity();
 	idDict tmp;
 	idPlayer* player = gameLocal.GetLocalPlayer();
-	common->Printf("%d",GetDamageEntity() == NULL);
+	idStr drops[11] = { "item_health_small","weapon_grenadelauncher","weapon_hyperblaster","first_seed","second_seed","third_seed","weapon_lightninggun","weapon_machinegun","weapon_railgun","weapon_rocketlauncher","weapon_shotgun" };
+	tmp.Copy(*gameLocal.FindEntityDefDict(drops[gameLocal.random.RandomInt(11)]));
+	tmp.Set("origin", GetPhysics()->GetOrigin().ToString());
+	idEntity* newEnt;
+	gameLocal.SpawnEntityDef(tmp, &newEnt);
 	if(ptr)
 	static_cast<idAI*>(ptr)->Pain(this, NULL, 0, GetPhysics()->GetOrigin(), 0);
 	tmp.Copy(*gameLocal.FindEntityDefDict("third_seed"));
 	player->GiveInventoryItem(&tmp);
-	//common->Printf("%d", gameLocal.GetLocalPlayer() == ptr);
 	return idAI::State_Killed(parms);
 }
 
