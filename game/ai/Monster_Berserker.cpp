@@ -405,6 +405,12 @@ rvMonsterBerserker::State_Killed
 ================
 */
 stateResult_t rvMonsterBerserker::State_Killed	( const stateParms_t& parms ) {
+	idStr drops[11] = { "item_health_small","weapon_grenadelauncher","weapon_hyperblaster","first_seed","second_seed","third_seed","weapon_lightninggun","weapon_machinegun","weapon_railgun","weapon_rocketlauncher","weapon_shotgun" };
+	idDict tmp;
+	tmp.Copy(*gameLocal.FindEntityDefDict(drops[gameLocal.random.RandomInt(11)]));
+	tmp.Set("origin", GetPhysics()->GetOrigin().ToString());
+	idEntity* newEnt;
+	gameLocal.SpawnEntityDef(tmp, &newEnt);
 	StopEffect ( "fx_charge_up" );
 	StopEffect ( "fx_ambient_electricity" );
 	StopEffect ( "fx_ambient_electricity_mace" );

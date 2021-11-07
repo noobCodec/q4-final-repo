@@ -50,7 +50,7 @@ private:
 	rvAIAction			actionSprayAttack;
 	rvAIAction			actionAngry;
 	rvAIAction			actionReload;
-
+	stateResult_t		State_Killed(const stateParms_t& parms);
 	virtual bool		CheckAction_JumpBack			( rvAIAction* action, int animNum );
 	virtual bool		CheckAction_EvadeLeft			( rvAIAction* action, int animNum );
 	virtual bool		CheckAction_EvadeRight			( rvAIAction* action, int animNum );
@@ -420,12 +420,23 @@ bool rvMonsterStroggMarine::CheckActions ( void ) {
 */
 
 CLASS_STATES_DECLARATION ( rvMonsterStroggMarine )
+	STATE("State_Killed", rvMonsterStroggMarine::State_Killed)
 	STATE ( "Torso_RollAttack",			rvMonsterStroggMarine::State_Torso_RollAttack )
 	STATE ( "Torso_RangedAttack",		rvMonsterStroggMarine::State_Torso_RangedAttack )
 	STATE ( "Torso_MovingRangedAttack",	rvMonsterStroggMarine::State_Torso_MovingRangedAttack )
 	STATE ( "Torso_SprayAttack",		rvMonsterStroggMarine::State_Torso_SprayAttack )
 END_CLASS_STATES
 
+
+stateResult_t rvMonsterStroggMarine::State_Killed(const stateParms_t& parms) {
+	idStr drops[11] = { "item_health_small","weapon_grenadelauncher","weapon_hyperblaster","first_seed","second_seed","third_seed","weapon_lightninggun","weapon_machinegun","weapon_railgun","weapon_rocketlauncher","weapon_shotgun"};
+	idDict tmp;
+	tmp.Copy(*gameLocal.FindEntityDefDict(drops[gameLocal.random.RandomInt(11)]));
+	tmp.Set("origin", GetPhysics()->GetOrigin().ToString());
+	idEntity* newEnt;
+	gameLocal.SpawnEntityDef(tmp, &newEnt);
+	return idAI::State_Killed(parms);
+}
 /*
 ================
 rvMonsterStroggMarine::State_Torso_RollAttack 
