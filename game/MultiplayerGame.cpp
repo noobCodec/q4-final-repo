@@ -9066,11 +9066,13 @@ void idMultiplayerGame::OpenLocalBuyMenu( void )
 	//		return;
 	//}
 
-	if ( currentMenu == 4 )
+	if (currentMenu == 4)
+		common->Printf("already open");
 		return; // Already open
-
+		common->Printf("in here");
 	gameLocal.sessionCommand = "game_startmenu";
 	gameLocal.mpGame.nextMenu = 4;
+	common->Printf("%d", gameLocal.mpGame.nextMenu);
 }
 
 /*	

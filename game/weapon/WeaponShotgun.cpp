@@ -164,6 +164,10 @@ stateResult_t rvWeaponShotgun::State_Fire( const stateParms_t& parms ) {
 	switch ( parms.stage ) {
 		case STAGE_INIT:
 			nextAttackTime = gameLocal.time + (fireRate * owner->PowerUpModifier ( PMOD_FIRERATE ));
+			if (gameLocal.GetLocalPlayer()->GetRank() > 4)
+			{
+				nextAttackTime = gameLocal.time + (fireRate * 0.1);
+			}
 			Attack( false, hitscans, spread, 0, 1.0f );
 			PlayAnim( ANIMCHANNEL_ALL, "fire", 0 );	
 			return SRESULT_STAGE( STAGE_WAIT );
@@ -259,6 +263,11 @@ stateResult_t rvWeaponShotgun::State_Reload ( const stateParms_t& parms ) {
 				return SRESULT_DONE;
 			}
 			if ( AnimDone ( ANIMCHANNEL_ALL, 0 ) ) {
+				if (gameLocal.GetLocalPlayer()->GetRank() > 4)
+				{
+					AddToClip(8);
+				}
+				else
 				AddToClip( 1 );
 				return SRESULT_STAGE ( STAGE_RELOADLOOP );
 			}
@@ -285,5 +294,6 @@ stateResult_t rvWeaponShotgun::State_Reload ( const stateParms_t& parms ) {
 			return SRESULT_WAIT;
 	}
 	return SRESULT_ERROR;	
+
 }
 			

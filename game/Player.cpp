@@ -243,7 +243,7 @@ idInventory::GivePowerUp
 */
 void idInventory::GivePowerUp( idPlayer *player, int powerup, int msec ) {
 	powerups |= 1 << powerup;
-	powerupEndTime[ powerup ] = msec == -1 ? -1 : (gameLocal.time + msec);
+	//powerupEndTime[ powerup ] = msec == -1 ? -1 : (gameLocal.time + msec);
 }
 
 /*
@@ -4905,6 +4905,7 @@ void idPlayer::UpdatePowerUps( void ) {
 					// only actually give health on the server
 					if( !gameLocal.isServer ) {
 						health += healthTic;
+						inventory.armor += 20;
 						if ( health > (healthBoundary * 1.1f) ) {
 							health = healthBoundary * 1.1f;
 						}
@@ -4914,6 +4915,7 @@ void idPlayer::UpdatePowerUps( void ) {
 				} else if ( health < (healthBoundary * 2) ) {
 					if( !gameLocal.isServer ) {
 						health += healthTic / 3;
+						inventory.armor += 20;
 						if ( health > (healthBoundary * 2) ) {
 							health = healthBoundary * 2;
 						}
@@ -4931,7 +4933,7 @@ void idPlayer::UpdatePowerUps( void ) {
 	}
 
 	// Regenerate ammo
-	if( gameLocal.isServer && PowerUpActive( POWERUP_AMMOREGEN ) ) {
+	if( !gameLocal.isServer && PowerUpActive( POWERUP_AMMOREGEN ) ) {
 		for( int i = 0; i < MAX_WEAPONS; i++ ) {
 			if( inventory.weapons & ( 1 << i ) ) {
 				int ammoIndex	= inventory.AmmoIndexForWeaponIndex( i );
@@ -4958,7 +4960,6 @@ void idPlayer::UpdatePowerUps( void ) {
 	// Tick armor down if greater than max armor
 	if ( !gameLocal.isClient && gameLocal.time > nextArmorPulse ) {
 		if ( inventory.armor > inventory.maxarmor ) { 
-			nextArmorPulse += ARMOR_PULSE;
 			inventory.armor--;
 		}		
 	}
@@ -8449,6 +8450,7 @@ idPlayer::PerformImpulse
 ==============
 */
 int waveincrement = 0; //shit
+idUserInterface* oldHud = NULL;
 void idPlayer::PerformImpulse( int impulse ) {
 
 //RAVEN BEGIN
@@ -8649,23 +8651,50 @@ void idPlayer::PerformImpulse( int impulse ) {
 			break;
 		}
 		case IMPULSE_23: {
-			/*idPlayer* player = gameLocal.GetLocalPlayer();
-			//common->Printf("%s\n", player->GetPhysics()->GetOrigin().ToAngles().ToString());
-			idUserInterface* test = uiManager->FindGui("guis/test2.gui", true, true, true);
-			if (test)
-				test->Activate(true, gameLocal.time);
-			else
-				common->Printf("failed");
-			//player->hud = test;
-			player->playerView.RenderPlayerView(test);
-			if (cursor) {
-				cursor->Activate(true, gameLocal.time);
+			idPlayer* player = gameLocal.GetLocalPlayer();
+		/*	if (!oldHud)
+			{
+				player->SetName("sugma");
+				common->Printf(player->GetName());
+				common->Printf("%s\n", player->GetPhysics()->GetOrigin().ToAngles().ToString());
+				idUserInterface* test = uiManager->FindGui("guis/test.gui", true, true, true);
+				if (test)
+					test->Activate(true, gameLocal.time);
+				else
+					common->Printf("failed");
+				oldHud = player->hud;
+				player->hud = test;
+				player->focusUI = test;
+				
 			}
-			player->GivePowerUp(POWERUP_REGENERATION, 1000000,false);
+			else
+			{
+				player->hud = oldHud;
+				player->focusUI = NULL;
+				oldHud = NULL;
+			}
 			*/
-			idDict tospawn;
-			tospawn.Copy(*gameLocal.FindEntityDefDict("second_seed"));
-			GiveInventoryItem(&tospawn);
+			//1 
+			float speed = cvarSystem->GetCVarFloat("pm_speed");
+			cvarSystem->SetCVarFloat("pm_speed", speed * 3);
+			//2 
+			player->GivePowerUp(POWERUP_REGENERATION, 100000);
+			//3
+			player->GivePowerUp(POWERUP_QUADDAMAGE, 1000000);
+			//4
+			player->GivePowerUp(POWERUP_AMMOREGEN, 100000);
+			//5
+			player->GivePowerUp(POWERUP_GUARD, 100000);
+			//6
+			player->inventory.maxarmor = 500;
+			//7
+			player->inventory.maxHealth = 500;
+			//8
+			player->SetRank(3);
+			//9
+			player->SetRank(4);
+			//10
+			player->SetRank(5);
 			break;
 		}
 		case IMPULSE_24: {
@@ -9608,7 +9637,7 @@ void idPlayer::Think( void ) {
 	// if we have an active gui, we will unrotate the view angles as
 	// we turn the mouse movements into gui events
 	idUserInterface *gui = ActiveGui();
-	if ( gui && gui != focusUI ) {
+	if ( gui  ) {
 		RouteGuiMouse( gui );
 	}
 
