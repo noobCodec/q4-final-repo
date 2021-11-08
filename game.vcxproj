@@ -235,6 +235,7 @@
     <ClCompile Include="game\ai\AI_States.cpp" />
     <ClCompile Include="game\ai\AI_Tactical.cpp" />
     <ClCompile Include="game\ai\AI_Util.cpp" />
+    <ClCompile Include="game\ai\fruit.cpp" />
     <ClCompile Include="game\ai\Monster_Berserker.cpp" />
     <ClCompile Include="game\ai\Monster_BossBuddy.cpp" />
     <ClCompile Include="game\ai\Monster_BossMakron.cpp" />
@@ -263,7 +264,9 @@
     <ClCompile Include="game\ai\Monster_Turret.cpp" />
     <ClCompile Include="game\ai\Monster_TurretFlying.cpp" />
     <ClCompile Include="game\ai\plant_test.cpp" />
+    <ClCompile Include="game\ai\tree.cpp" />
     <ClCompile Include="game\ai\VehicleAI.cpp" />
+    <ClCompile Include="game\ai\wheat.cpp" />
     <ClCompile Include="game\anim\Anim.cpp" />
     <ClCompile Include="game\anim\Anim_Blend.cpp" />
     <ClCompile Include="game\anim\Anim_Import.cpp" />
@@ -480,6 +483,7 @@
     <ClInclude Include="game\vehicle\VehicleStatic.h" />
     <ClInclude Include="game\Weapon.h" />
     <ClInclude Include="game\WorldSpawn.h" />
+    <ClInclude Include="temp.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="game\Game.def" />
