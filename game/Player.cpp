@@ -1303,7 +1303,7 @@ idPlayer::idPlayer() {
 	mutedPlayers = 0;
 	friendPlayers = 0;
 	connectTime = 0;
-	rank = -1;
+	rank = 0;
 	arena = 0;
 
 	memset( nextAmmoRegenPulse, 0, sizeof( int ) * MAX_AMMO );
